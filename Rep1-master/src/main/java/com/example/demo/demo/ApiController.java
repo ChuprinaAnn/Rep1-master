@@ -19,8 +19,8 @@ public class ApiController {
     }
     //создать пользователя
     // curl -X POST http://localhost:8080/user  -H 'Content-Type: application/json' -d '{"username": "Max", "password": "abc", "age": "20")
-    @PostMapping("user")
-    public User addUser(@RequestBody User user, String repeatPassword) {
+    @PostMapping("user/{repeatPassword}")
+    public User addUser(@RequestBody User user, @PathVariable String repeatPassword) {
         if (!repeatPassword.equals(user.getPassword())) {
         throw new BadRequestException();}
         Optional<User> userData =
@@ -45,8 +45,8 @@ public class ApiController {
     }
     //обновить пользователя по id
     //curl -X PUT  http://localhost:8080/users/{id}  -H 'Content-Type: application/json' -d '{"username": "Max", "password": "abc", "age": "20")
-    @PutMapping("users/{id}")
-    public User updateUser(@PathVariable("id") long id, @RequestBody User user,String repeatPassword) {
+    @PutMapping("users/{id}/{repeatPassword}")
+    public User updateUser(@PathVariable("id") long id, @RequestBody User user, @PathVariable String repeatPassword) {
         if (!repeatPassword.equals(user.getPassword())) {
             throw new BadRequestException();}
         Optional<User> UserData =
@@ -74,20 +74,15 @@ public class ApiController {
     //выдать список пользователей c параметром возраста
     //curl -X GET  http://localhost:8080/users?age=20
     @GetMapping("users")
-    public List<String> getUsers(@RequestParam ("age") Integer age) {
+    public List<User> getUsers(@RequestParam ("age") Integer age) {
         List<String> usersNames = new ArrayList<>();
         List<User> users = new ArrayList<User>();
         if (age == null) {
-            userRepository.findAll().forEach(users::add);
+          return  userRepository.findAll();
+
         } else {
-            for (int i = 0; i < 10; i++) {
-                userRepository.findByAge(age-5+i).forEach(users::add);
-            }
+            return (List<User>) userRepository.findByAge(age-5,age+5);
         }
-        for (User u: users) {
-            usersNames.add(u.getUsername());
-        }
-        return usersNames;
     }
 }
 
